@@ -65,16 +65,7 @@ En utilisant l'interface graphique de votre OS :
 
 - 🌞 **sur le PC *serveur*** avec par exemple l'IP 192.168.1.1
 - 🌞 **sur le PC *client*** avec par exemple l'IP 192.168.1.2
-  - ![image](netcat1.png)
-
----
-
-- 🌞 pour aller un peu plus loin
-  - le serveur peut préciser sur quelle IP écouter, et ne pas répondre sur les autres
-  - par exemple, on écoute sur l'interface Ethernet, mais pas sur la WiFI
-  - pour ce faire `nc.exe -l -p PORT_NUMBER IP_ADDRESS`
-  - par exemple `nc.exe -l -p 9999 192.168.1.37`
-  - on peut aussi accepter uniquement les connexions internes à la machine en écoutant sur `127.0.0.1`
+  - ![image](netcat.png)
 
 ## 6. Firewall
 
@@ -83,16 +74,12 @@ Toujours par 2.
 Le but est de configurer votre firewall plutôt que de le désactiver
 
 - Activez votre firewall
+Pour cela, j'ai installé ufw.
 - 🌞 Autoriser les `ping`
-  - configurer le firewall de votre OS pour accepter le `ping`
-  - aidez vous d'internet
-  - on rentrera dans l'explication dans un prochain cours mais sachez que `ping` envoie un message *ICMP de type 8* (demande d'ECHO) et reçoit un message *ICMP de type 0* (réponse d'écho) en retour
+  Cette règle est présente dans le fichier configuration de ufw:
+  - ![image](allowping.png)
 - 🌞 Autoriser le traffic sur le port qu'utilise `nc`
-  - on parle bien d'ouverture de **port** TCP et/ou UDP
-  - on ne parle **PAS** d'autoriser le programme `nc`
-  - choisissez arbitrairement un port entre 1024 et 20000
-  - vous utiliserez ce port pour [communiquer avec `netcat`](#5-petit-chat-privé-) par groupe de 2 toujours
-  - le firewall du *PC serveur* devra avoir un firewall activé et un `netcat` qui fonctionne
+  - ![image](firewall.png)
   
 # III. Manipulations d'autres outils/protocoles côté client
 
