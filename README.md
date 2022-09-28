@@ -65,7 +65,7 @@ En utilisant l'interface graphique de votre OS :
 
 - 🌞 **sur le PC *serveur*** avec par exemple l'IP 192.168.1.1
 - 🌞 **sur le PC *client*** avec par exemple l'IP 192.168.1.2
-  - ![image](Images/netcat.png)
+  - ![image](Images/netcat1.png)
 
 ## 6. Firewall
 
@@ -76,7 +76,7 @@ Le but est de configurer votre firewall plutôt que de le désactiver
 - J'ai utilisé ufw pour activer mon firewall
 - 🌞 Autoriser les `ping`
   Cette règle est présente dans le fichier configuration de ufw:
-  - ![image](allowping.png)
+  - ![image](Images/allowping.png)
 - 🌞 Autoriser le traffic sur le port qu'utilise `nc`
   - ![image](Images/firewall.png)
   
