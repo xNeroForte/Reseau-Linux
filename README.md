@@ -96,9 +96,10 @@ Une fois que le serveur DHCP vous a donné une IP, vous enregistrer un fichier a
 
 🌞Exploration du DHCP, depuis votre PC
 
-- afficher l'adresse IP du serveur DHCP du réseau WiFi YNOV
-- cette adresse a une durée de vie limitée. C'est le principe du ***bail DHCP*** (ou *DHCP lease*). Trouver la date d'expiration de votre bail DHCP
-- vous pouvez vous renseigner un peu sur le fonctionnement de DHCP dans les grandes lignes. On aura sûrement un cours là dessus :)
+*La commande **nmcli con show WiFi@YNOV** permet d'afficher toutes les infos du client DHCP:
+
+- Adresse IP du serveur DHCP du réseau WiFi YNOV : 10.33.19.254
+- Date d'expiration du bail DHCP: dhcp_lease_time = 80135 (22h15m)
 
 ## 2. DNS
 
@@ -108,20 +109,21 @@ Un **serveur DNS** est un serveur à qui l'on peut poser des questions (= effect
 
 Si votre navigateur fonctionne "normalement" (il vous permet d'aller sur `google.com` par exemple) alors votre ordinateur connaît forcément l'adresse d'un serveur DNS. Et quand vous naviguez sur internet, il effectue toutes les requêtes DNS à votre place, de façon automatique.
 
-- 🌞 trouver l'adresse IP du serveur DNS que connaît votre ordinateur
+- 🌞 trouver l'adresse IP du serveur DNS que connaît votre ordinateur:
+![image](dns.png)
 
 - 🌞 utiliser, en ligne de commande l'outil `nslookup` (Windows, MacOS) ou `dig` (GNU/Linux, MacOS) pour faire des requêtes DNS à la main
 
   - faites un *lookup* (*lookup* = "dis moi à quelle IP se trouve tel nom de domaine")
-    - pour `google.com`
-    - pour `ynov.com`
-    - interpréter les résultats de ces commandes
-  - déterminer l'adresse IP du serveur à qui vous venez d'effectuer ces requêtes
+    - pour `google.com` : ![img](dig1.png)
+    - pour `ynov.com` : ![img](dig2.png)
+    - interpréter les résultats de ces commandes:
+    - Avec *dig* j'ai demandé à quelle IP se trouvaient les noms de domaines (QUESTIONS), et les réponses sont listées dans ANSWERS.
+  - déterminer l'adresse IP du serveur à qui vous venez d'effectuer ces requêtes: 8.8.8.8
   - faites un *reverse lookup* (= "dis moi si tu connais un nom de domaine pour telle IP")
-    - pour l'adresse `78.74.21.21`
-    - pour l'adresse `92.146.54.88`
-    - interpréter les résultats
-    - *si vous vous demandez, j'ai pris des adresses random :)*
+    - pour l'adresse `78.74.21.21` : ![img](dig5.png)
+    - pour l'adresse `92.146.54.88` : ![img](dig6.png)
+    - On peut en conclure que la première adresse renvoie à un nom de domaine, mais pas la seconde.
 
 # IV. Wireshark
 
