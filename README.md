@@ -23,7 +23,7 @@ En utilisant l'interface graphique de votre OS :
 **🌞 Trouvez comment afficher les informations sur une carte IP (change selon l'OS)**
 
 - Sous MANJARO: Cliquer sur l'icône "Wi-Fi" > Détails
-- ![image](config2.png)
+- ![image](Images/config2.png)
 
 
 ### Questions
@@ -37,7 +37,7 @@ En utilisant l'interface graphique de votre OS :
 
 🌞 Utilisez l'interface graphique de votre OS pour **changer d'adresse IP** :
 
-- ![image](changementip.png)
+- ![image](Images/changementip.png)
 
 🌞 **Il est possible que vous perdiez l'accès internet.** Que ce soit le cas ou non, expliquez pourquoi c'est possible de perdre son accès internet en faisant cette opération.
 - On peut perdre sa connexion internet en essayant de se connecter à une adresse déjà allouée. (On peut envoyer, mais pas télécharger)
@@ -49,15 +49,15 @@ En utilisant l'interface graphique de votre OS :
 
 🌞Si vos PCs ont un port RJ45 alors y'a une carte réseau Ethernet associée :
 
-- ![image](arpping.png)
+- ![image](Images/arpping.png)
 - NOTE: kdieu-ubuntu est l'alias de 192.168.2.253/30
 
 ## 4. Utilisation d'un des deux comme gateway
 - PC1: 
 - 🌞 pour tester la connectivité à internet on fait souvent des requêtes simples vers un serveur internet connu
-  - ![image](ping.png)
+  - ![image](Images/ping.png)
 - 🌞 utiliser un `traceroute` ou `tracert` pour bien voir que les requêtes passent par la passerelle choisie (l'autre le PC)
-- ![image](traceroute.png)
+- ![image](Images/traceroute.png)
 
 ## 5. Petit chat privé
 
@@ -65,7 +65,7 @@ En utilisant l'interface graphique de votre OS :
 
 - 🌞 **sur le PC *serveur*** avec par exemple l'IP 192.168.1.1
 - 🌞 **sur le PC *client*** avec par exemple l'IP 192.168.1.2
-  - ![image](netcat.png)
+  - ![image](Images/netcat.png)
 
 ## 6. Firewall
 
@@ -73,26 +73,16 @@ Toujours par 2.
 
 Le but est de configurer votre firewall plutôt que de le désactiver
 
-- Activez votre firewall
-Pour cela, j'ai installé ufw.
+- J'ai utilisé ufw pour activer mon firewall
 - 🌞 Autoriser les `ping`
   Cette règle est présente dans le fichier configuration de ufw:
   - ![image](allowping.png)
 - 🌞 Autoriser le traffic sur le port qu'utilise `nc`
-  - ![image](firewall.png)
+  - ![image](Images/firewall.png)
   
 # III. Manipulations d'autres outils/protocoles côté client
 
 ## 1. DHCP
-
-Bon ok vous savez définir des IPs à la main. Mais pour être dans le réseau YNOV, vous l'avez jamais fait.  
-
-C'est le **serveur DHCP** d'YNOV qui vous a donné une IP.
-
-Une fois que le serveur DHCP vous a donné une IP, vous enregistrer un fichier appelé *bail DHCP* qui contient, entre autres :
-
-- l'IP qu'on vous a donné
-- le réseau dans lequel cette IP est valable
 
 🌞Exploration du DHCP, depuis votre PC
 
@@ -103,26 +93,20 @@ Une fois que le serveur DHCP vous a donné une IP, vous enregistrer un fichier a
 
 ## 2. DNS
 
-Le protocole DNS permet la résolution de noms de domaine vers des adresses IP. Ce protocole permet d'aller sur `google.com` plutôt que de devoir connaître et utiliser l'adresse IP du serveur de Google.  
-
-Un **serveur DNS** est un serveur à qui l'on peut poser des questions (= effectuer des requêtes) sur un nom de domaine comme `google.com`, afin d'obtenir les adresses IP liées au nom de domaine.  
-
-Si votre navigateur fonctionne "normalement" (il vous permet d'aller sur `google.com` par exemple) alors votre ordinateur connaît forcément l'adresse d'un serveur DNS. Et quand vous naviguez sur internet, il effectue toutes les requêtes DNS à votre place, de façon automatique.
-
 - 🌞 trouver l'adresse IP du serveur DNS que connaît votre ordinateur:
-![image](dns.png)
+![image](Images/dns.png)
 
 - 🌞 utiliser, en ligne de commande l'outil `nslookup` (Windows, MacOS) ou `dig` (GNU/Linux, MacOS) pour faire des requêtes DNS à la main
 
-  - faites un *lookup* (*lookup* = "dis moi à quelle IP se trouve tel nom de domaine")
-    - pour `google.com` : ![img](dig1.png)
-    - pour `ynov.com` : ![img](dig2.png)
+  LOOKUP:
+    - pour `google.com` : ![img](Images/dig1.png)
+    - pour `ynov.com` : ![img](Images/dig2.png)
     - interpréter les résultats de ces commandes:
     - Avec *dig* j'ai demandé à quelle IP se trouvaient les noms de domaines (QUESTIONS), et les réponses sont listées dans ANSWERS.
   - déterminer l'adresse IP du serveur à qui vous venez d'effectuer ces requêtes: 8.8.8.8
-  - faites un *reverse lookup* (= "dis moi si tu connais un nom de domaine pour telle IP")
-    - pour l'adresse `78.74.21.21` : ![img](dig5.png)
-    - pour l'adresse `92.146.54.88` : ![img](dig6.png)
+  REVERSE-LOOKUP:
+    - pour l'adresse `78.74.21.21` : ![img](Images/dig5.png)
+    - pour l'adresse `92.146.54.88` : ![img](Images/dig6.png)
     - On peut en conclure que la première adresse renvoie à un nom de domaine, mais pas la seconde.
 
 # IV. Wireshark
