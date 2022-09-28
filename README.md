@@ -65,7 +65,7 @@ En utilisant l'interface graphique de votre OS :
 
 - 🌞 **sur le PC *serveur*** avec par exemple l'IP 192.168.1.1
 - 🌞 **sur le PC *client*** avec par exemple l'IP 192.168.1.2
-  - ![image](netcat.png)
+  - ![image](netcat1.png)
 
 ---
 
