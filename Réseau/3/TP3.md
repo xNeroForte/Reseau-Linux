@@ -51,7 +51,7 @@ ip a
 - utiliser la commande `tcpdump` pour réaliser une capture de trame:
 
 ```bash
-# On vide vos tables ARP, sur les deux machines, puis effectuez un `ping`
+# On vide les tables ARP, sur les deux machines, puis effectuez un `ping`
 [admin@john ~]$ sudo ip -s -s neigh flush all
 
 [admin@marcel ~]$ ping 10.3.1.11
@@ -73,143 +73,85 @@ rtt min/avg/max/mdev = 0.589/0.924/1.550/0.337 ms
 
 ## II. Routage
 
-Vous aurez besoin de 3 VMs pour cette partie. **Réutilisez les deux VMs précédentes.**
-
 | Machine  | `10.3.1.0/24` | `10.3.2.0/24` |
 | -------- | ------------- | ------------- |
 | `router` | `10.3.1.254`  | `10.3.2.254`  |
 | `john`   | `10.3.1.11`   | no            |
 | `marcel` | no            | `10.3.2.12`   |
 
-> Je les appelés `marcel` et `john` PASKON EN A MAR des noms nuls en réseau 🌻
-
-```schema
-   john                router              marcel
-  ┌─────┐             ┌─────┐             ┌─────┐
-  │     │    ┌───┐    │     │    ┌───┐    │     │
-  │     ├────┤ho1├────┤     ├────┤ho2├────┤     │
-  └─────┘    └───┘    └─────┘    └───┘    └─────┘
-```
+`
 
 ### 1. Mise en place du routage
 
 🌞**Activer le routage sur le noeud `router`**
 
-> Cette étape est nécessaire car Rocky Linux c'est pas un OS dédié au routage par défaut. Ce n'est bien évidemment une opération qui n'est pas nécessaire sur un équipement routeur dédié comme du matériel Cisco.
+```bash
+[admin@router ~]$ cat /etc/sysctl.d/router.conf
+net.ipv4.ip_forward=1
+[admin@router ~]$ cat /proc/sys/net/ipv4/ip_forward
+1
+```
 
 🌞**Ajouter les routes statiques nécessaires pour que `john` et `marcel` puissent se `ping`**
 
 - il faut ajouter une seule route des deux côtés
+
+```bash
+#De manière temporaire
+[admin@john ~]$ sudo ip route add 10.3.1.0/24 via 10.3.1.254 dev enp0s8
+#Définitivement
+[admin@john ~]$ cat /etc/sysconfig/network-scripts/route-enp0s8
+10.3.2.0/24 via 10.3.1.254 dev enp0s8
+#On vérifie que la route soit en place
+[admin@john ~]$ ip route show
+default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 100
+10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15 metric 100
+10.3.2.0/24 via 10.3.1.254 dev enp0s8
+```
+
 - une fois les routes en place, vérifiez avec un `ping` que les deux machines peuvent se joindre
 
-![THE SIZE](./pics/thesize.png)
+```bash
+[admin@marcel ~]$ ping -c 5 10.3.1.11
+PING 10.3.1.11 (10.3.1.11) 56(84) bytes of data.
+64 bytes from 10.3.1.11: icmp_seq=1 ttl=63 time=2.82 ms
+64 bytes from 10.3.1.11: icmp_seq=2 ttl=63 time=1.99 ms
+64 bytes from 10.3.1.11: icmp_seq=3 ttl=63 time=1.90 ms
+64 bytes from 10.3.1.11: icmp_seq=4 ttl=63 time=1.97 ms
+64 bytes from 10.3.1.11: icmp_seq=5 ttl=63 time=1.66 ms
+
+--- 10.3.1.11 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4042ms
+rtt min/avg/max/mdev = 1.662/2.068/2.821/0.394 ms
+```
 
 ### 2. Analyse de trames
 
 🌞**Analyse des échanges ARP**
 
-- videz les tables ARP des trois noeuds
+- On vide les tables ARP des trois noeuds avec `sudo ip neigh flush all`
 - effectuez un `ping` de `john` vers `marcel`
-- regardez les tables ARP des trois noeuds
-- essayez de déduire un peu les échanges ARP qui ont eu lieu
-- répétez l'opération précédente (vider les tables, puis `ping`), en lançant `tcpdump` sur `marcel`
-- **écrivez, dans l'ordre, les échanges ARP qui ont eu lieu, puis le ping et le pong, je veux TOUTES les trames** utiles pour l'échange
 
-Par exemple (copiez-collez ce tableau ce sera le plus simple) :
+```
+[admin@john ~]$ ping -c1 10.3.2.12
+PING 10.3.2.12 (10.3.2.12) 56(84) bytes of data.
+64 bytes from 10.3.2.12: icmp_seq=1 ttl=63 time=3.91 ms
 
-| ordre | type trame  | IP source | MAC source              | IP destination | MAC destination            |
-| ----- | ----------- | --------- | ----------------------- | -------------- | -------------------------- |
-| 1     | Requête ARP | x         | `john` `AA:BB:CC:DD:EE` | x              | Broadcast `FF:FF:FF:FF:FF` |
-| 2     | Réponse ARP | x         | ?                       | x              | `john` `AA:BB:CC:DD:EE`    |
-| ...   | ...         | ...       | ...                     |                |                            |
-| ?     | Ping        | ?         | ?                       | ?              | ?                          |
-| ?     | Pong        | ?         | ?                       | ?              | ?                          |
-
-> Vous pourriez, par curiosité, lancer la capture sur `john` aussi, pour voir l'échange qu'il a effectué de son côté.
-
-🦈 **Capture réseau `tp2_routage_marcel.pcapng`**
-
-### 3. Accès internet
-
-🌞**Donnez un accès internet à vos machines**
-
-- ajoutez une carte NAT en 3ème inteface sur le `router` pour qu'il ait un accès internet
-- ajoutez une route par défaut à `john` et `marcel`
-  - vérifiez que vous avez accès internet avec un `ping`
-  - le `ping` doit être vers une IP, PAS un nom de domaine
-- donnez leur aussi l'adresse d'un serveur DNS qu'ils peuvent utiliser
-  - vérifiez que vous avez une résolution de noms qui fonctionne avec `dig`
-  - puis avec un `ping` vers un nom de domaine
-
-🌞**Analyse de trames**
-
-- effectuez un `ping 8.8.8.8` depuis `john`
-- capturez le ping depuis `john` avec `tcpdump`
-- analysez un ping aller et le retour qui correspond et mettez dans un tableau :
-
-| ordre | type trame | IP source          | MAC source              | IP destination | MAC destination |     |
-| ----- | ---------- | ------------------ | ----------------------- | -------------- | --------------- | --- |
-| 1     | ping       | `john` `10.3.1.12` | `john` `AA:BB:CC:DD:EE` | `8.8.8.8`      | ?               |     |
-| 2     | pong       | ...                | ...                     | ...            | ...             | ... |
-
-🦈 **Capture réseau `tp2_routage_internet.pcapng`**
-
-## III. DHCP
-
-On reprend la config précédente, et on ajoutera à la fin de cette partie une 4ème machine pour effectuer des tests.
-
-| Machine  | `10.3.1.0/24`              | `10.3.2.0/24` |
-| -------- | -------------------------- | ------------- |
-| `router` | `10.3.1.254`               | `10.3.2.254`  |
-| `john`   | `10.3.1.11`                | no            |
-| `bob`    | oui mais pas d'IP statique | no            |
-| `marcel` | no                         | `10.3.2.12`   |
-
-```schema
-   john               router              marcel
-  ┌─────┐             ┌─────┐             ┌─────┐
-  │     │    ┌───┐    │     │    ┌───┐    │     │
-  │     ├────┤ho1├────┤     ├────┤ho2├────┤     │
-  └─────┘    └─┬─┘    └─────┘    └───┘    └─────┘
-   dhcp        │
-  ┌─────┐      │
-  │     │      │
-  │     ├──────┘
-  └─────┘
+--- 10.3.2.12 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 3.908/3.908/3.908/0.000 ms
 ```
 
-### 1. Mise en place du serveur DHCP
+- On enregistre la trame sur `marcel`
 
-🌞**Sur la machine `john`, vous installerez et configurerez un serveur DHCP** (go Google "rocky linux dhcp server").
+| ordre | type trame  | IP source            | MAC source                   | IP destination       | MAC destination              |
+| ----- | ----------- | -------------------- | ---------------------------- | -------------------- | ---------------------------- |
+| 1     | Requête ARP | x                    | `john` `08:00:27:03:57:6e`   | x                    | Broadcast `FF:FF:FF:FF:FF`   |
+| 2     | Réponse ARP | `marcel` `10.3.2.12` | `marcel` `08:00:27:8d:65:07` | x                    | `john` `AA:BB:CC:DD:EE`      |
+| 3     | Ping        | `john` `10.3.1.11`   | `john` `08:00:27:03:57:6e`   | `marcel` `10.3.2.12` | `marcel` `08:00:27:8d:65:07` |
+| 4     | Pong        | `marcel` `10.3.2.12` | `marcel` `08:00:27:8d:65:07` | `john` `10.3.1.11`   | `marcel` `08:00:27:8d:65:07` |
+| 5     | Requête ARP | `marcel` `10.3.2.12` | `marcel` `08:00:27:8d:65:07` | `john` `10.3.1.11`   | `john` `08:00:27:03:57:6e`   |
+| 6     | Réponse ARP | `john` `10.3.1.11`   | `john` `08:00:27:03:57:6e`   | `marcel` `10.3.2.12` | `marcel` `08:00:27:8d:65:07` |
 
-- installation du serveur sur `john`
-- créer une machine `bob`
-- faites lui récupérer une IP en DHCP à l'aide de votre serveur
-
-> Il est possible d'utilise la commande `dhclient` pour forcer à la main, depuis la ligne de commande, la demande d'une IP en DHCP, ou renouveler complètement l'échange DHCP (voir `dhclient -h` puis call me et/ou Google si besoin d'aide).
-
-🌞**Améliorer la configuration du DHCP**
-
-- ajoutez de la configuration à votre DHCP pour qu'il donne aux clients, en plus de leur IP :
-  - une route par défaut
-  - un serveur DNS à utiliser
-- récupérez de nouveau une IP en DHCP sur `bob` pour tester :
-  - `marcel` doit avoir une IP
-    - vérifier avec une commande qu'il a récupéré son IP
-    - vérifier qu'il peut `ping` sa passerelle
-  - il doit avoir une route par défaut
-    - vérifier la présence de la route avec une commande
-    - vérifier que la route fonctionne avec un `ping` vers une IP
-  - il doit connaître l'adresse d'un serveur DNS pour avoir de la résolution de noms
-    - vérifier avec la commande `dig` que ça fonctionne
-    - vérifier un `ping` vers un nom de domaine
-
-### 2. Analyse de trames
-
-🌞**Analyse de trames**
-
-- lancer une capture à l'aide de `tcpdump` afin de capturer un échange DHCP
-- demander une nouvelle IP afin de générer un échange DHCP
-- exportez le fichier `.pcapng`
-
-🦈 **Capture réseau `tp2_dhcp.pcapng`**
+🦈 **Capture réseau `tp2_routage_marcel.pcapng`**
+![Capture réseau](./Pics/tp2_routage_marcel.pcapng)
